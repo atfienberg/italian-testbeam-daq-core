@@ -245,7 +245,7 @@ void WorkerCaen1742::LoadConfig()
         LogError("failed to read boad status while setting DAC");
 	break;
 
-      } else if (!(msg & 0x84)) {
+      } else if (!(msg & 0x104)) {
 
         // This is what should happen
         break;
@@ -328,7 +328,8 @@ void WorkerCaen1742::LoadConfig()
   }
 
   usleep(1000);
-
+  
+ /*
   // Send a test software trigger and read it out.
   rc = Write(0x8108, msg);
   if (rc != 0) {
@@ -340,6 +341,13 @@ void WorkerCaen1742::LoadConfig()
   if (EventAvailable()) {
     caen_1742 bundle;
     GetEvent(bundle);
+    }*/
+
+  //clear data, 
+  //this prevents the digitizer from sometimes hanging in busy mode  
+  rc = Write(0xef28, msg);
+  if (rc != 0) {
+    LogError("failed to clear data");
   }
 
   LogMessage("LoadConfig finished");
