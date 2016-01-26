@@ -115,18 +115,18 @@ void WriterOnline::PackMessage() {
 
   json_map["event_number"] = number_of_events_;
 
-  for (auto &sis : data.sis_3350_vec) {
+  for (auto sis : data.sis_3350_vec) {
     json11::Json::object sis_map;
     auto trace_len = max_trace_length_ < 0 ? SIS_3350_LN : max_trace_length_;
 
-    sis_map["system_clock"] = sis.system_clock;
+    sis_map["system_clock"] = static_cast<double>(sis.system_clock);
 
-    sis_map["device_clock"] = std::vector<decltype(sis.device_clock[0])>(
-        sis.device_clock, sis.device_clock + SIS_3350_CH);
+    sis_map["device_clock"] =
+        std::vector<double>(sis.device_clock, sis.device_clock + SIS_3350_CH);
 
-    trace_vec std::vector<std::vector<decltype(sis.trace[0][0])> >;
+    std::vector<std::vector<double> > trace_vec;
     for (int ch = 0; ch < SIS_3350_CH; ++ch) {
-      trace_vec.emplace_back(sis.trace[ch], sis.trace[ch] + trace_len)
+      trace_vec.emplace_back(sis.trace[ch], sis.trace[ch] + trace_len);
     }
     sis_map["trace"] = trace_vec;
 
@@ -139,14 +139,14 @@ void WriterOnline::PackMessage() {
     json11::Json::object sis_map;
     auto trace_len = max_trace_length_ < 0 ? SIS_3302_LN : max_trace_length_;
 
-    sis_map["system_clock"] = sis.system_clock;
+    sis_map["system_clock"] = static_cast<double>(sis.system_clock);
 
-    sis_map["device_clock"] = std::vector<decltype(sis.device_clock[0])>(
-        sis.device_clock, sis.device_clock + SIS_3302_CH);
+    sis_map["device_clock"] =
+        std::vector<double>(sis.device_clock, sis.device_clock + SIS_3302_CH);
 
-    trace_vec std::vector<std::vector<decltype(sis.trace[0][0])> >;
+    std::vector<std::vector<double> > trace_vec;
     for (int ch = 0; ch < SIS_3302_CH; ++ch) {
-      trace_vec.emplace_back(sis.trace[ch], sis.trace[ch] + trace_len)
+      trace_vec.emplace_back(sis.trace[ch], sis.trace[ch] + trace_len);
     }
     sis_map["trace"] = trace_vec;
 
@@ -159,14 +159,14 @@ void WriterOnline::PackMessage() {
     json11::Json::object sis_map;
     auto trace_len = max_trace_length_ < 0 ? SIS_3316_LN : max_trace_length_;
 
-    sis_map["system_clock"] = sis.system_clock;
+    sis_map["system_clock"] = static_cast<double>(sis.system_clock);
 
-    sis_map["device_clock"] = std::vector<decltype(sis.device_clock[0])>(
-        sis.device_clock, sis.device_clock + SIS_3316_CH);
+    sis_map["device_clock"] =
+        std::vector<double>(sis.device_clock, sis.device_clock + SIS_3316_CH);
 
-    trace_vec std::vector<std::vector<decltype(sis.trace[0][0])> >;
+    std::vector<std::vector<double> > trace_vec;
     for (int ch = 0; ch < SIS_3316_CH; ++ch) {
-      trace_vec.emplace_back(sis.trace[ch], sis.trace[ch] + trace_len)
+      trace_vec.emplace_back(sis.trace[ch], sis.trace[ch] + trace_len);
     }
     sis_map["trace"] = trace_vec;
 
@@ -179,14 +179,14 @@ void WriterOnline::PackMessage() {
     json11::Json::object caen_map;
     auto trace_len = max_trace_length_ < 0 ? CAEN_6742_LN : max_trace_length_;
 
-    caen_map["system_clock"] = caen.system_clock;
+    caen_map["system_clock"] = static_cast<double>(caen.system_clock);
 
-    caen_map["device_clock"] = std::vector<decltype(caen.device_clock[0])>(
-        caen.device_clock, caen.device_clock + caen_6742_CH);
+    caen_map["device_clock"] = std::vector<double>(
+        caen.device_clock, caen.device_clock + CAEN_6742_CH);
 
-    trace_vec std::vector<std::vector<decltype(caen.trace[0][0])> >;
+    std::vector<std::vector<double> > trace_vec;
     for (int ch = 0; ch < CAEN_6742_CH; ++ch) {
-      trace_vec.emplace_back(caen.trace[ch], caen.trace[ch] + trace_len)
+      trace_vec.emplace_back(caen.trace[ch], caen.trace[ch] + trace_len);
     }
     caen_map["trace"] = trace_vec;
 
@@ -199,20 +199,20 @@ void WriterOnline::PackMessage() {
     json11::Json::object caen_map;
     auto trace_len = max_trace_length_ < 0 ? CAEN_1742_LN : max_trace_length_;
 
-    caen_map["system_clock"] = caen.system_clock;
+    caen_map["system_clock"] = static_cast<double>(caen.system_clock);
 
-    caen_map["device_clock"] = std::vector<decltype(caen.device_clock[0])>(
+    caen_map["device_clock"] = std::vector<double>(
         caen.device_clock, caen.device_clock + CAEN_1742_CH);
 
-    trace_vec std::vector<std::vector<decltype(caen.trace[0][0])> >;
+    std::vector<std::vector<double> > trace_vec;
     for (int ch = 0; ch < CAEN_1742_CH; ++ch) {
-      trace_vec.emplace_back(caen.trace[ch], caen.trace[ch] + trace_len)
+      trace_vec.emplace_back(caen.trace[ch], caen.trace[ch] + trace_len);
     }
     caen_map["trace"] = trace_vec;
 
-    trig_vec std::vector<std::vector<decltype(caen.trigger[0][0])> >;
+    std::vector<std::vector<double> > trig_vec;
     for (int gr = 0; gr < CAEN_1742_GR; ++gr) {
-      trig_vec.emplace_back(caen.trigger[ch], caen.trigger[ch] + trace_len)
+      trig_vec.emplace_back(caen.trigger[gr], caen.trigger[gr] + trace_len);
     }
     caen_map["trigger"] = trig_vec;
 
@@ -225,20 +225,19 @@ void WriterOnline::PackMessage() {
     json11::Json::object drs_map;
     auto trace_len = max_trace_length_ < 0 ? DRS4_LN : max_trace_length_;
 
-    drs_map["system_clock"] = board.system_clock;
+    drs_map["system_clock"] = static_cast<double>(board.system_clock);
 
-    drs_map["device_clock"] = std::vector<decltype(board.device_clock[0])>(
-        board.device_clock, board.device_clock + DRS4_CH);
+    drs_map["device_clock"] =
+        std::vector<double>(board.device_clock, board.device_clock + DRS4_CH);
 
-    trace_vec std::vector<std::vector<decltype(board.trace[0][0])> >;
+    std::vector<std::vector<double> > trace_vec;
     for (int ch = 0; ch < DRS4_CH; ++ch) {
-      trace_vec.emplace_back(board.trace[ch], board.trace[ch] + trace_len)
+      trace_vec.emplace_back(board.trace[ch], board.trace[ch] + trace_len);
     }
     drs_map["trace"] = trace_vec;
 
     sprintf(str, "drs4_vec_%i", count++);
     json_map[str] = drs_map;
-    
   }
 
   std::string buffer = json11::Json(json_map).dump();

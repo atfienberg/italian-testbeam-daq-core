@@ -51,8 +51,8 @@ LIBS = $(shell root-config --libs)
 CXXFLAGS += $(shell wx-config --cxxflags)
 LIBS += $(shell wx-config --libs)
 
-CPPFLAGS += -Iinclude -Iinclude/drs
-LIBS += -lm -lzmq -ljson_spirit -lCAENDigitizer -lusb-1.0 -lutil -lpthread
+CPPFLAGS += -Iinclude -Iinclude/drs -Ijson11
+LIBS += -lm -lzmq -lCAENDigitizer -lusb-1.0 -lutil -lpthread
 
 all: $(OBJECTS) $(OBJ_VME) $(OBJ_DRS) $(TARGETS) lib/$(ARNAME) $(DATADEF) \
 	$(LOGFILE) $(CONFDIR)
@@ -68,6 +68,9 @@ $(CONFDIR):
 include/%.hh: include/.default_%.hh
 	cp $+ $@
 
+build/json11.o: json11/json11.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+
 build/%.o: src/%.cxx $(DATADEF)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
@@ -75,7 +78,7 @@ build/%.o: include/vme/%.c $(DATADEF)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 build/%.o: src/drs/%.cpp $(DATADEF)
-	$(CXX)  $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 build/%.o: src/drs/%.c $(DATADEF)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
@@ -87,8 +90,8 @@ fe_%: modules/fe_%.cxx $(OBJECTS) $(OBJ_VME) $(OBJ_DRS) $(DATADEF)
 %_daq: modules/%_daq.cxx $(DATADEF)
 	$(CXX) $< -o $@  $(CXXFLAGS) $(CPPFLAGS) $(LIBS)
 
-lib/$(ARNAME): $(OBJECTS) $(OBJ_VME) $(OJB_DRS) $(DATADEF)
+lib/$(ARNAME): $(OBJECTS) $(OBJ_VME) $(OJB_DRS) $(DATADEF) build/json11.o
 	$(AR) -rcs $@ $+
 
 clean:
-	rm -f $(TARGETS) $(OBJECTS) $(OBJ_VME) $(OBJ_DRS)
+	rm -f $(TARGETS) $(OBJECTS) $(OBJ_VME) $(OBJ_DRS) build/json11.o
