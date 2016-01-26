@@ -12,7 +12,7 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #include <zmq.hpp>
-#include <json_spirit.h>
+#include <json11.hpp>
 
 //--- project includes ------------------------------------------------------//
 #include "writer_base.hh"
