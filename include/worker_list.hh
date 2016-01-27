@@ -28,8 +28,7 @@
 #include "worker_caen1785.hh"
 #include "worker_caen6742.hh"
 #include "worker_caen1742.hh"
-#include "worker_drs4.hh"
-#include "worker_fake.hh"
+// #include "worker_drs4.hh"
 
 namespace daq {
 
