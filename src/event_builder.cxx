@@ -60,7 +60,7 @@ void EventBuilder::BuilderLoop()
     
 	LogMessage("Data queue is now size = %i", pull_data_que_.size()); 
 
-	workers_.FlushEventData();
+	//	workers_.FlushEventData();
       }
       
       std::this_thread::yield();

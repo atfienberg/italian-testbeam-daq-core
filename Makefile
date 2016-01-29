@@ -40,8 +40,8 @@ endif
 CPPFLAGS += $(shell root-config --cflags)
 LIBS = $(shell root-config --libs)
 
-CPPFLAGS += -Iinclude -Iinclude/drs -Ijson11
-LIBS += -lm -lzmq -lCAENDigitizer -lusb-1.0 -lutil -lpthread
+CPPFLAGS += -Iinclude -Ijson11
+LIBS += -lm -lzmq -lCAENDigitizer -lutil -lpthread
 
 all: $(OBJECTS) $(OBJ_VME) $(OBJ_DRS) $(TARGETS) $(DATADEF) \
 	$(LOGFILE) $(CONFDIR)

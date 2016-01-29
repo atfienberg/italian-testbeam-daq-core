@@ -118,9 +118,6 @@ private:
   
   // Simple variable declarations
   std::string conf_file_;
-  int live_time_;
-  int dead_time_;
-  long long live_ticks_;
   long long batch_start_;
   int max_event_time_;
   int batch_size_;

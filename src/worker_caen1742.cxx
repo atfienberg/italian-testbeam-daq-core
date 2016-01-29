@@ -361,11 +361,9 @@ void WorkerCaen1742::WorkLoop()
   while (thread_live_) {
 
     while (go_time_) {
+      static caen_1742 bundle;
 
-      if (EventAvailable()) {
-
-        static caen_1742 bundle;
-        GetEvent(bundle);
+      if (EventAvailable() && GetEvent(bundle)) {
 
         queue_mutex_.lock();
         data_queue_.push(bundle);
@@ -470,7 +468,7 @@ bool WorkerCaen1742::EventAvailable()
   return false;
 }
 
-void WorkerCaen1742::GetEvent(caen_1742 &bundle)
+bool WorkerCaen1742::GetEvent(caen_1742 &bundle)
 {
   using namespace std::chrono;
 
@@ -520,7 +518,7 @@ void WorkerCaen1742::GetEvent(caen_1742 &bundle)
   if (rc < 0) {
     std::fill(buffer.begin(), buffer.end(), 0);
     buffer.resize(0);
-    return;
+    return false;
   }
 
   //std::cout << "num words read: " << rc << std::endl;
@@ -529,7 +527,7 @@ void WorkerCaen1742::GetEvent(caen_1742 &bundle)
   // Make sure we aren't getting empty events
   //if (buffer.size() < 5) {
   if (rc < 5) {
-    return;
+    return false;
   }
 
 
@@ -554,6 +552,8 @@ void WorkerCaen1742::GetEvent(caen_1742 &bundle)
   uint chdata[8];
   int start_idx = 4; // Skip main event header
   int stop_idx = 4;
+
+  bundle.device_clock[0] = buffer[2];
 
   LogDebug("beginning to unpack data");
   for (int grp_idx = 0; grp_idx < CAEN_1742_GR; ++grp_idx) {
@@ -646,6 +646,8 @@ void WorkerCaen1742::GetEvent(caen_1742 &bundle)
   }
 
   LogDebug("data readout complete");
+
+  return true;
 }
 
 

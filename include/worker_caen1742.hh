@@ -103,7 +103,7 @@ private:
   bool EventAvailable();
 
   // If EventAvailable, read the data and add it to the queue.
-  void GetEvent(caen_1742 &bundle);
+  bool GetEvent(caen_1742 &bundle);
 
   // A function that runs through the three different DRS4 corrections
   // remove effects produce by imperfection in the domino sampling process.
