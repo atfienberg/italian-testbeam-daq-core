@@ -6,11 +6,11 @@
   author: Matthias W. Smith
   email:  mwsmith2@uw.edu
   file:   worker_list.hh
-  
+
   about:  Creates a vector class that can hold all data workers. This
           class makes event building and run flow much simpler to handle.
-	  Additionally if new hardware is to be integrated it needs to be
-	  added to this class.
+          Additionally if new hardware is to be integrated it needs to be
+          added to this class.
 
 \*===========================================================================*/
 
@@ -28,16 +28,15 @@
 #include "worker_caen1785.hh"
 #include "worker_caen6742.hh"
 #include "worker_caen1742.hh"
+#include "worker_caenDT5720.hh"
 // #include "worker_drs4.hh"
 
 namespace daq {
 
 class WorkerList : public CommonBase {
-
  public:
-
   // ctor
-  WorkerList() : CommonBase(std::string("WorkerList")) {};
+  WorkerList() : CommonBase(std::string("WorkerList")){};
 
   // dtor - the WorkerList takes ownership of workers appended to
   // its worker vector.  They can be freed externally, but we need to
@@ -82,23 +81,20 @@ class WorkerList : public CommonBase {
   void FlushEventData();
 
   // Add a newly allocated worker to the current list.
-  void PushBack(worker_ptr_types worker) {
-    workers_.push_back(worker);
-  }
+  void PushBack(worker_ptr_types worker) { workers_.push_back(worker); }
 
   // Deallocates each worker.
   void FreeList();
-    
+
   // Return the size of the list.
   int Size() { return workers_.size(); };
   void Resize(int size) { workers_.resize(0); };
 
  private:
-
   // This is the actual worker list.
   std::vector<worker_ptr_types> workers_;
 };
 
-} // ::daq
+}  // ::daq
 
 #endif

@@ -160,6 +160,10 @@ struct GetEventDataVis : public boost::static_visitor<> {
     bundle->sis_3316_vec.push_back(workerptr->PopEvent());
   }
 
+  void operator()(WorkerBase<caen_5720> *workerptr) {
+    bundle->caen_5720_vec.push_back(workerptr->PopEvent());
+  }
+
   event_data *bundle;
 };
 

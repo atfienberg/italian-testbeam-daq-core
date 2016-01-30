@@ -177,7 +177,7 @@ void WriterRoot::StartWriter()
   for (auto &v : conf.get_child("devices.caen_1742")) {
     count++;
   }
-  root_data_.caen_1785_vec.reserve(count);
+  root_data_.caen_1742_vec.reserve(count);
 
   count = 0;
   for (auto &v : conf.get_child("devices.caen_1742")) {
@@ -193,6 +193,30 @@ void WriterRoot::StartWriter()
 
     pt_->Branch(br_name.c_str(), 
 		&root_data_.caen_1742_vec[count++], 
+		br_vars);
+
+  }
+
+  //now the dt5720
+  count = 0;
+  for (auto &v : conf.get_child("devices.caen_5720")) {
+    count++;
+  }
+  root_data_.caen_5720_vec.reserve(count);
+
+  count = 0;
+  for (auto &v : conf.get_child("devices.caen_5720")) {
+
+    root_data_.caen_5720_vec.resize(count + 1);
+
+    br_name = std::string(v.first);
+    sprintf(br_vars, 
+	    "event_index/l:system_clock/l:trace[%i][%i]/s", 
+	    CAEN_5720_CH, 
+	    CAEN_5720_LN);
+
+    pt_->Branch(br_name.c_str(), 
+		&root_data_.caen_5720_vec[count++], 
 		br_vars);
 
   }
@@ -248,6 +272,12 @@ void WriterRoot::PushData(const std::vector<event_data> &data_buffer)
     count = 0;
     for (auto &drs: (*it).drs4_vec) {
       root_data_.drs4_vec[count++] = drs;
+    }
+
+    count = 0;
+    for (auto &caen: (*it).caen_5720_vec) {
+      std::cout << "channel 0 sample 0 : " << caen.trace[0][0] << std::endl;
+      root_data_.caen_5720_vec[count++] = caen;
     }
 
     pt_->Fill();
