@@ -276,7 +276,6 @@ void WriterRoot::PushData(const std::vector<event_data> &data_buffer)
 
     count = 0;
     for (auto &caen: (*it).caen_5720_vec) {
-      std::cout << "channel 0 sample 0 : " << caen.trace[0][0] << std::endl;
       root_data_.caen_5720_vec[count++] = caen;
     }
 

@@ -12,17 +12,28 @@ WorkerCaenDT5720::WorkerCaenDT5720(std::string name, std::string conf)
 WorkerCaenDT5720::~WorkerCaenDT5720() {
   CAEN_DGTZ_SWStopAcquisition(device_);
   CAEN_DGTZ_FreeEvent(device_, (void**)&event_);
+  CAEN_DGTZ_FreeReadoutBuffer(&buffer_);
+  CAEN_DGTZ_CloseDigitizer(device_);
 }
 
 void WorkerCaenDT5720::LoadConfig() {
   WorkerCaenUSBBase<caen_5720>::LoadConfig();
 
   CAEN_DGTZ_SetRecordLength(device_, CAEN_5720_LN);
+
   CAEN_DGTZ_SetChannelEnableMask(device_, 0xf);
 
-  // allocate event
-  CAEN_DGTZ_AllocateEvent(device_, (void**)&event_);
-  CAEN_DGTZ_SWStartAcquisition(device_);
+  // allocate event and buffer
+
+  if (CAEN_DGTZ_MallocReadoutBuffer(device_, &buffer_, &size_)) {
+    LogMessage("failed to allocate readout buffer.");
+  }
+  if (CAEN_DGTZ_AllocateEvent(device_, (void**)&event_)){
+    LogMessage("failed to allocate event");
+  }
+  if (CAEN_DGTZ_SWStartAcquisition(device_)){
+    LogMessage("failed to start acquisition");
+  }
 }
 
 void WorkerCaenDT5720::GetEvent(caen_5720& bundle) {

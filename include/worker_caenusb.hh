@@ -29,8 +29,6 @@ class WorkerCaenUSBBase : public WorkerBase<T> {
   }
 
   virtual ~WorkerCaenUSBBase() {
-    CAEN_DGTZ_FreeReadoutBuffer(&buffer_);
-    CAEN_DGTZ_CloseDigitizer(device_);
   }
 
   void LoadConfig() override;
@@ -92,10 +90,6 @@ void WorkerCaenUSBBase<T>::LoadConfig() {
 
   if (CAEN_DGTZ_SetMaxNumEventsBLT(device_, 1)) {
     this->LogMessage("failed to set max BLT events");
-  }
-
-  if (CAEN_DGTZ_MallocReadoutBuffer(device_, &buffer_, &size_)) {
-    this->LogMessage("failed to allocate readout buffer.");
   }
 
   // rest of stuff should be done in base class
