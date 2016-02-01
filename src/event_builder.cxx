@@ -80,7 +80,13 @@ void EventBuilder::ControlLoop()
 
     while (go_time_) {
 
-      if (pull_data_que_.size() >= batch_size_) {
+      bool over_batch_size = false;
+      {
+	std::lock_guard<std::mutex> lock(queue_mutex_);
+	over_batch_size = pull_data_que_.size() >= batch_size_;
+      }
+
+      if (over_batch_size) {
 	
         LogMessage("Pushing data");
         CopyBatch();

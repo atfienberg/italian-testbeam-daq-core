@@ -88,7 +88,7 @@ class WorkerList : public CommonBase {
 
   // Return the size of the list.
   int Size() { return workers_.size(); };
-  void Resize(int size) { workers_.resize(0); };
+  void Resize(int size) { workers_.resize(size); };
 
  private:
   // This is the actual worker list.

@@ -103,15 +103,18 @@ void WriterOnline::PackMessage() {
 
   json11::Json::object json_map;
 
-  std::unique_lock<std::mutex> pack_message_lock(writer_mutex_);
+  event_data data;
+  {
+    std::lock_guard<std::mutex> pack_message_lock(writer_mutex_);
 
-  if (data_queue_.empty()) {
-    return;
+    if (data_queue_.empty()) {
+      return;
+    }
+
+    data = data_queue_.front();
+    data_queue_.pop();
+    if (data_queue_.size() == 0) queue_has_data_ = false;
   }
-
-  event_data data = data_queue_.front();
-  data_queue_.pop();
-  if (data_queue_.size() == 0) queue_has_data_ = false;
 
   json_map["event_number"] = number_of_events_;
 

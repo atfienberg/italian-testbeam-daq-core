@@ -21,7 +21,7 @@ class WorkerCaenUSBBase : public WorkerBase<T> {
  public:
   WorkerCaenUSBBase(std::string name, std::string conf)
       : WorkerBase<T>(name, conf),
-        device_(0),
+	device_(0),
         size_(0),
         bsize_(0),
         buffer_(nullptr) {
@@ -29,6 +29,10 @@ class WorkerCaenUSBBase : public WorkerBase<T> {
   }
 
   virtual ~WorkerCaenUSBBase() {
+    CAEN_DGTZ_ErrorCode ret;
+    if(ret = CAEN_DGTZ_CloseDigitizer(device_)){
+      this->LogError("failed to close digitizer, error code %i", ret);
+    }
   }
 
   void LoadConfig() override;
@@ -36,7 +40,19 @@ class WorkerCaenUSBBase : public WorkerBase<T> {
   T PopEvent() override;
 
  protected:
-  virtual void GetEvent(T& bundle) = 0;
+  virtual T GetEvent() = 0;
+
+  virtual void StartAcquisition() {  
+    if(CAEN_DGTZ_SWStartAcquisition(device_)){
+      this->LogError("failed to start acquisition.");
+    }
+  }
+
+  virtual void StopAcquisition() {
+    if(CAEN_DGTZ_SWStopAcquisition(device_)){
+      this->LogError("failed to stop acquisition.");
+    }
+  }
 
   void WorkLoop() override;
 
@@ -63,8 +79,9 @@ void WorkerCaenUSBBase<T>::LoadConfig() {
   CAEN_DGTZ_ErrorCode ret;
 
   int id = conf_.get<int>("device_id");
-  if (CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, id, 0, 0, &device_)) {
-    this->LogError("failed to open device");
+
+  if (ret = CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, id, 0, 0, &device_)) {
+    this->LogError("failed to open device, error code %i", ret);
   }
 
   if (CAEN_DGTZ_Reset(device_)) {
@@ -93,7 +110,8 @@ void WorkerCaenUSBBase<T>::LoadConfig() {
   }
 
   // rest of stuff should be done in base class
-  // set acquisition mode, start acquisition, allocate event
+  // set acquisition mode, allocate buffers, 
+  // device specific settings, etc
 }
 
 template <typename T>
@@ -101,12 +119,12 @@ void WorkerCaenUSBBase<T>::WorkLoop() {
   CAEN_DGTZ_ErrorCode ret;
 
   t0_ = std::chrono::high_resolution_clock::now();
-
+  
+  StartAcquisition();
   while (this->thread_live_) {
     while (this->go_time_) {
       if (EventAvailable()) {
-        T bundle;
-        GetEvent(bundle);
+        T bundle = GetEvent();
 
         std::lock_guard<std::mutex> lock(this->queue_mutex_);
         this->data_queue_.push(bundle);
@@ -120,6 +138,7 @@ void WorkerCaenUSBBase<T>::WorkLoop() {
     std::this_thread::yield();
     usleep(daq::long_sleep);
   }
+  StopAcquisition();
 }
 
 template <typename T>

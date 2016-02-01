@@ -14,7 +14,7 @@ class WorkerCaenDT5720 : public WorkerCaenUSBBase<caen_5720> {
   void LoadConfig();
 
  protected:
-  void GetEvent(caen_5720& event) override;
+  caen_5720 GetEvent() override;
 
  private:
   CAEN_DGTZ_UINT16_EVENT_t* event_;
