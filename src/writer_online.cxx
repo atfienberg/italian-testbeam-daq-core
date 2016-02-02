@@ -58,9 +58,6 @@ void WriterOnline::EndOfBatch(bool bad_data) {
 }
 
 void WriterOnline::SendMessageLoop() {
-  boost::property_tree::ptree conf;
-  boost::property_tree::read_json(conf_file_, conf);
-
   while (thread_live_) {
     while (go_time_ && queue_has_data_) {
       if (!message_ready_) {
@@ -266,7 +263,9 @@ void WriterOnline::PackMessage() {
   buffer.append("__EOM__");
 
   message_ = zmq::message_t(buffer.size());
-  memcpy(message_.data(), buffer.c_str(), buffer.size());
+  std::copy((char*)buffer.data(), 
+	    (char*)buffer.data() + buffer.size(), 
+	    (char*)message_.data());
 
   LogMessage("Message ready");
   message_ready_ = true;

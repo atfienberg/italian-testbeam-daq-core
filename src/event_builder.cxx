@@ -2,11 +2,10 @@
 
 namespace daq {
 
-EventBuilder::EventBuilder(const WorkerList &workers, 
+EventBuilder::EventBuilder(const WorkerList &workers,
                            const std::vector<WriterBase *> writers,
-                           std::string conf_file) : 
-  CommonBase(std::string("EventBuilder"))
-{
+                           std::string conf_file)
+    : CommonBase(std::string("EventBuilder")) {
   workers_ = workers;
   writers_ = writers;
   conf_file_ = conf_file;
@@ -15,11 +14,9 @@ EventBuilder::EventBuilder(const WorkerList &workers,
 
   builder_thread_ = std::thread(&EventBuilder::BuilderLoop, this);
   push_data_thread_ = std::thread(&EventBuilder::ControlLoop, this);
-
 }
 
-void EventBuilder::LoadConfig()
-{
+void EventBuilder::LoadConfig() {
   boost::property_tree::ptree conf;
   boost::property_tree::read_json(conf_file_, conf);
 
@@ -32,79 +29,70 @@ void EventBuilder::LoadConfig()
   max_event_time_ = conf.get<int>("max_event_time", 2000);
 }
 
-void EventBuilder::BuilderLoop()
-{
+void EventBuilder::BuilderLoop() {
   // Thread can only be killed by ending the run.
   while (thread_live_) {
-
     // Update the reference and drop any events outside of run time.
     batch_start_ = clock();
     workers_.FlushEventData();
 
     // Collect data while the run isn't paused, in a deadtime or finished.
     while (go_time_) {
-      
       if (WorkersGotSyncEvent()) {
+        // Get the data.
+        event_data bundle;
 
-	// Get the data.
-	event_data bundle;
-	
-	workers_.GetEventData(bundle);
-	
-	// Push it back to pull_data queue.
-	queue_mutex_.lock();
-	if (pull_data_que_.size() < kMaxQueueSize) {
-	  pull_data_que_.push(bundle);
-	}
-	queue_mutex_.unlock();
-    
-	LogMessage("Data queue is now size = %i", pull_data_que_.size()); 
+        workers_.GetEventData(bundle);
 
-	//	workers_.FlushEventData();
+        // Push it back to pull_data queue.
+        queue_mutex_.lock();
+        if (pull_data_que_.size() < kMaxQueueSize) {
+          pull_data_que_.push(bundle);
+        }
+        queue_mutex_.unlock();
+
+        LogMessage("Data queue is now size = %i", pull_data_que_.size());
+
+        //  workers_.FlushEventData();
       }
-      
+
       std::this_thread::yield();
       usleep(daq::short_sleep);
 
-    } // go_time_
+    }  // go_time_
 
     std::this_thread::yield();
     usleep(daq::long_sleep);
 
-  } // thread_live_
+  }  // thread_live_
 }
 
-void EventBuilder::ControlLoop()
-{
+void EventBuilder::ControlLoop() {
   while (thread_live_) {
-
     while (go_time_) {
-
       bool over_batch_size = false;
       {
-	std::lock_guard<std::mutex> lock(queue_mutex_);
-	over_batch_size = pull_data_que_.size() >= batch_size_;
+        std::lock_guard<std::mutex> lock(queue_mutex_);
+        over_batch_size = pull_data_que_.size() >= batch_size_;
       }
 
       if (over_batch_size) {
-	
         LogMessage("Pushing data");
         CopyBatch();
         SendBatch();
       }
 
       if (quitting_time_) {
-	
-	StopWorkers();
+        StopWorkers();
 
-	CopyBatch();
-	workers_.FlushEventData();
+        CopyBatch();
+        workers_.FlushEventData();
 
-	SendLastBatch();
-	
-	go_time_ = false;
-	thread_live_ = false;
-	finished_run_ = true;
+        SendLastBatch();
+
+        go_time_ = false;
+        thread_live_ = false;
+        finished_run_ = true;
       }
 
       std::this_thread::yield();
@@ -116,26 +104,23 @@ void EventBuilder::ControlLoop()
   }
 }
 
-bool EventBuilder::WorkersGotSyncEvent() 
-{
+bool EventBuilder::WorkersGotSyncEvent() {
   // Check if anybody has an event.
   if (!workers_.AnyWorkersHaveEvent()) return false;
   LogMessage("Detected a trigger");
 
   // Wait for all devices to get a chance to read the event.
-  usleep(max_event_time_); 
+  usleep(max_event_time_);
 
   // Drop the event if not all devices got a trigger.
   if (!workers_.AllWorkersHaveEvent()) {
- 
     workers_.FlushEventData();
     LogMessage("Event was not synched");
     return false;
   }
-    
+
   // Drop the event if any devices got two triggers.
   if (workers_.AnyWorkersHaveMultiEvent()) {
-
     workers_.FlushEventData();
     LogMessage("Trigger was actually a double event");
     return false;
@@ -145,13 +130,11 @@ bool EventBuilder::WorkersGotSyncEvent()
   return true;
 }
 
-void EventBuilder::CopyBatch() 
-{
+void EventBuilder::CopyBatch() {
   push_data_mutex_.lock();
   push_data_vec_.resize(0);
-  
+
   for (int i = 0; i < batch_size_; ++i) {
-    
     queue_mutex_.lock();
 
     if (!pull_data_que_.empty()) {
@@ -167,8 +150,7 @@ void EventBuilder::CopyBatch()
   push_data_mutex_.unlock();
 }
 
-void EventBuilder::SendBatch()
-{
+void EventBuilder::SendBatch() {
   push_data_mutex_.lock();
 
   for (auto &writer : writers_) {
@@ -178,8 +160,7 @@ void EventBuilder::SendBatch()
   push_data_mutex_.unlock();
 }
 
-void EventBuilder::SendLastBatch()
-{
+void EventBuilder::SendLastBatch() {
   LogMessage("Sending last batch");
 
   // Zero the pull data vec
@@ -190,13 +171,11 @@ void EventBuilder::SendLastBatch()
   push_data_mutex_.lock();
   LogMessage("Sending end of batch/run to the writers");
   for (auto &writer : writers_) {
-    
     writer->PushData(push_data_vec_);
     writer->EndOfBatch(false);
   }
   push_data_mutex_.unlock();
 }
-  
 
 // Start the workers taking data.
 void EventBuilder::StartWorkers() {
@@ -210,4 +189,4 @@ void EventBuilder::StopWorkers() {
   workers_.StopWorkers();
 }
 
-} // ::daq
+}  // ::daq

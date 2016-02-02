@@ -31,8 +31,16 @@ class WriterOnline : public WriterBase {
   
   //dtor
   ~WriterOnline() {
-    // Dump data.
     go_time_ = false;
+    thread_live_ = false;
+    if (writer_thread_.joinable()) {
+      try {
+	writer_thread_.join();
+      } catch (std::system_error e) {
+	LogError("encountered race condition joining thread");
+      }
+    }
+    // Dump data.
     FlushData();
   };
   
