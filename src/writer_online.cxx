@@ -111,9 +111,9 @@ void WriterOnline::PackMessage() {
     data = data_queue_.front();
     data_queue_.pop();
     if (data_queue_.size() == 0) queue_has_data_ = false;
-  }
 
-  json_map["event_number"] = number_of_events_;
+    json_map["event_number"] = number_of_events_;
+  }
 
   for (auto sis : data.sis_3350_vec) {
     json11::Json::object sis_map;
@@ -247,7 +247,7 @@ void WriterOnline::PackMessage() {
 
     caen_map["system_clock"] = static_cast<double>(caen.system_clock);
 
-    caen_map["event_index"] = static_cast<double>(caen.event_index);				      
+    caen_map["event_index"] = static_cast<double>(caen.event_index);
 
     std::vector<std::vector<double> > trace_vec;
     for (int ch = 0; ch < CAEN_5720_CH; ++ch) {
@@ -263,9 +263,7 @@ void WriterOnline::PackMessage() {
   buffer.append("__EOM__");
 
   message_ = zmq::message_t(buffer.size());
-  std::copy((char*)buffer.data(), 
-	    (char*)buffer.data() + buffer.size(), 
-	    (char*)message_.data());
+  std::copy(buffer.begin(), buffer.end(), (char *)message_.data());
 
   LogMessage("Message ready");
   message_ready_ = true;

@@ -21,7 +21,7 @@ class WorkerCaenUSBBase : public WorkerBase<T> {
  public:
   WorkerCaenUSBBase(std::string name, std::string conf)
       : WorkerBase<T>(name, conf),
-	device_(0),
+        device_(0),
         size_(0),
         bsize_(0),
         buffer_(nullptr) {
@@ -30,7 +30,7 @@ class WorkerCaenUSBBase : public WorkerBase<T> {
 
   virtual ~WorkerCaenUSBBase() {
     CAEN_DGTZ_ErrorCode ret;
-    if(ret = CAEN_DGTZ_CloseDigitizer(device_)){
+    if (ret = CAEN_DGTZ_CloseDigitizer(device_)) {
       this->LogError("failed to close digitizer, error code %i", ret);
     }
   }
@@ -42,14 +42,14 @@ class WorkerCaenUSBBase : public WorkerBase<T> {
  protected:
   virtual T GetEvent() = 0;
 
-  virtual void StartAcquisition() {  
-    if(CAEN_DGTZ_SWStartAcquisition(device_)){
+  virtual void StartAcquisition() {
+    if (CAEN_DGTZ_SWStartAcquisition(device_)) {
       this->LogError("failed to start acquisition.");
     }
   }
 
   virtual void StopAcquisition() {
-    if(CAEN_DGTZ_SWStopAcquisition(device_)){
+    if (CAEN_DGTZ_SWStopAcquisition(device_)) {
       this->LogError("failed to stop acquisition.");
     }
   }
@@ -94,7 +94,7 @@ void WorkerCaenUSBBase<T>::LoadConfig() {
     this->LogMessage("Found caen %s.", board_info_.ModelName);
     this->LogMessage("Serial Number: %i.", board_info_.SerialNumber);
   }
-  
+
   this->LogMessage("set sw trigger mode");
   if (CAEN_DGTZ_SetSWTriggerMode(device_, CAEN_DGTZ_TRGMODE_ACQ_ONLY)) {
     this->LogError("failed to enable sw triggers");
@@ -110,7 +110,7 @@ void WorkerCaenUSBBase<T>::LoadConfig() {
   }
 
   // rest of stuff should be done in base class
-  // set acquisition mode, allocate buffers, 
+  // set acquisition mode, allocate buffers,
   // device specific settings, etc
 }
 
@@ -119,7 +119,7 @@ void WorkerCaenUSBBase<T>::WorkLoop() {
   CAEN_DGTZ_ErrorCode ret;
 
   t0_ = std::chrono::high_resolution_clock::now();
-  
+
   StartAcquisition();
   while (this->thread_live_) {
     while (this->go_time_) {
@@ -146,16 +146,21 @@ T WorkerCaenUSBBase<T>::PopEvent() {
   std::lock_guard<std::mutex> lock(this->queue_mutex_);
 
   if (this->data_queue_.empty()) {
+    this->LogWarning("popped an empty event");
+
     T empty_structure;
+
+    //set event index to -1 to tag as empty
+    empty_structure.event_index = -1;
     return empty_structure;
 
   } else {
+    // Check if this is that last event.
+    if (this->data_queue_.size() == 1) this->has_event_ = false;
+
     // Copy the data.
     T data = this->data_queue_.front();
     this->data_queue_.pop();
-
-    // Check if this is that last event.
-    if (this->data_queue_.size() == 0) this->has_event_ = false;
 
     return data;
   }

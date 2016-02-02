@@ -3,7 +3,7 @@
 namespace daq {
 
 EventBuilder::EventBuilder(const WorkerList &workers,
-                           const std::vector<WriterBase *> writers,
+                           const std::vector<WriterBase *> &writers,
                            std::string conf_file)
     : CommonBase(std::string("EventBuilder")) {
   workers_ = workers;
@@ -86,7 +86,6 @@ void EventBuilder::ControlLoop() {
         StopWorkers();
 
         CopyBatch();
-        workers_.FlushEventData();
 
         SendLastBatch();
 

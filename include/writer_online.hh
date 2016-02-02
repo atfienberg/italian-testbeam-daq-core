@@ -23,39 +23,37 @@ namespace daq {
 // A class that interfaces with the an EventBuilder and writes a root file.
 
 class WriterOnline : public WriterBase {
-
  public:
+  // ctor
+  explicit WriterOnline(std::string conf_file);
 
-  //ctor
-  WriterOnline(std::string conf_file);
-  
-  //dtor
+  // dtor
   ~WriterOnline() {
     go_time_ = false;
     thread_live_ = false;
     if (writer_thread_.joinable()) {
       try {
-	writer_thread_.join();
-      } catch (std::system_error e) {
-	LogError("encountered race condition joining thread");
+        writer_thread_.join();
+      } catch (const std::system_error& e) {
+        LogError("encountered race condition joining thread");
       }
     }
     // Dump data.
     FlushData();
   };
-  
+
   // Member Functions
   void LoadConfig();
-  void StartWriter() { 
-    go_time_ = true; 
-    number_of_events_ = 0; };
+  void StartWriter() {
+    go_time_ = true;
+    number_of_events_ = 0;
+  };
   void StopWriter() { go_time_ = false; };
-  
-  void PushData(const std::vector<event_data> &data_buffer);
+
+  void PushData(const std::vector<event_data>& data_buffer);
   void EndOfBatch(bool bad_data);
-   
+
  private:
-  
   const int kMaxQueueSize = 5;
   int max_trace_length_;
   int number_of_events_;
@@ -63,7 +61,7 @@ class WriterOnline : public WriterBase {
   std::atomic<bool> go_time_;
   std::atomic<bool> queue_has_data_;
   std::queue<event_data> data_queue_;
-  
+
   // zmq stuff
   zmq::socket_t online_sck_;
   zmq::message_t message_;
@@ -84,7 +82,7 @@ class WriterOnline : public WriterBase {
     writer_mutex_.unlock();
   };
 };
-  
-} // ::daq
+
+}  // ::daq
 
 #endif

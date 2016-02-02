@@ -20,12 +20,10 @@ namespace daq {
 // A class that interfaces with the an EventBuilder and writes a root file.
 
 class WriterRoot : public WriterBase {
-
  public:
+  // ctor
+  explicit WriterRoot(std::string conf_file);
 
-  //ctor
-  WriterRoot(std::string conf_file);
-  
   // Member Functions
   void LoadConfig();
   void StartWriter();
@@ -33,19 +31,18 @@ class WriterRoot : public WriterBase {
 
   void PushData(const std::vector<event_data> &data_buffer);
   void EndOfBatch(bool bad_data);
-  
+
  private:
-  
   bool need_sync_;
   std::string outfile_;
   std::string tree_name_;
-  
+
   TFile *pf_;
   TTree *pt_;
 
   event_data root_data_;
 };
 
-} // ::daq
+}  // ::daq
 
 #endif

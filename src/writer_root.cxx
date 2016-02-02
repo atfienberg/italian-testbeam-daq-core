@@ -2,14 +2,12 @@
 
 namespace daq {
 
-WriterRoot::WriterRoot(std::string conf_file) : WriterBase(conf_file)
-{
+WriterRoot::WriterRoot(std::string conf_file) : WriterBase(conf_file) {
   end_of_batch_ = false;
   LoadConfig();
 }
 
-void WriterRoot::LoadConfig()
-{
+void WriterRoot::LoadConfig() {
   boost::property_tree::ptree conf;
   boost::property_tree::read_json(conf_file_, conf);
 
@@ -18,8 +16,7 @@ void WriterRoot::LoadConfig()
   need_sync_ = conf.get<bool>("writers.root.sync", false);
 }
 
-void WriterRoot::StartWriter()
-{
+void WriterRoot::StartWriter() {
   using namespace boost::property_tree;
 
   // Allocate ROOT files
@@ -49,27 +46,23 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.sis_3350")) {
-
     root_data_.sis_3350_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s", 
-      SIS_3350_CH, SIS_3350_CH, SIS_3350_LN);
+    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s",
+            SIS_3350_CH, SIS_3350_CH, SIS_3350_LN);
 
     pt_->Branch(br_name.c_str(), &root_data_.sis_3350_vec[count++], br_vars);
-
   }
 
   for (auto &v : conf.get_child("devices.fake")) {
-
     root_data_.sis_3350_vec.resize(count);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s", 
-      SIS_3350_CH, SIS_3350_CH, SIS_3350_LN);
+    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s",
+            SIS_3350_CH, SIS_3350_CH, SIS_3350_LN);
 
     pt_->Branch(br_name.c_str(), &root_data_.sis_3350_vec[count++], br_vars);
-
   }
 
   // Again, count, reserve then assign the slow struck.
@@ -81,15 +74,13 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.sis_3302")) {
-
     root_data_.sis_3302_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s", 
-      SIS_3302_CH, SIS_3302_CH, SIS_3302_LN);
+    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s",
+            SIS_3302_CH, SIS_3302_CH, SIS_3302_LN);
 
     pt_->Branch(br_name.c_str(), &root_data_.sis_3302_vec[count++], br_vars);
-
   }
 
   // Now handle the SIS3316 devices.
@@ -101,15 +92,13 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.sis_3316")) {
-
     root_data_.sis_3302_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s", 
-      SIS_3316_CH, SIS_3316_CH, SIS_3316_LN);
+    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s",
+            SIS_3316_CH, SIS_3316_CH, SIS_3316_LN);
 
     pt_->Branch(br_name.c_str(), &root_data_.sis_3302_vec[count++], br_vars);
-
   }
 
   // Now set up the caen adc.
@@ -121,15 +110,13 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.caen_1785")) {
-
     root_data_.caen_1785_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:value[%i]/s", 
-      CAEN_1785_CH, CAEN_1785_CH);
+    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:value[%i]/s",
+            CAEN_1785_CH, CAEN_1785_CH);
 
     pt_->Branch(br_name.c_str(), &root_data_.caen_1785_vec[count++], br_vars);
-
   }
 
   // Now set up the caen drs.
@@ -141,15 +128,13 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.caen_6742")) {
-
     root_data_.caen_6742_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s", 
-	    CAEN_6742_CH, CAEN_6742_CH, CAEN_6742_LN);
+    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s",
+            CAEN_6742_CH, CAEN_6742_CH, CAEN_6742_LN);
 
     pt_->Branch(br_name.c_str(), &root_data_.caen_6742_vec[count++], br_vars);
-
   }
 
   // Now set up the drs evaluation board.
@@ -161,15 +146,13 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.drs4")) {
-
     root_data_.drs4_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s", 
-	    DRS4_CH, DRS4_CH, DRS4_LN);
+    sprintf(br_vars, "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s",
+            DRS4_CH, DRS4_CH, DRS4_LN);
 
     pt_->Branch(br_name.c_str(), &root_data_.drs4_vec[count++], br_vars);
-
   }
 
   // Now set up the caen drs vme module.
@@ -181,23 +164,18 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.caen_1742")) {
-
     root_data_.caen_1742_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, 
-      "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s:trigger[%i][%i]/s", 
-	    CAEN_1742_CH, 
-	    CAEN_1742_CH, CAEN_1742_LN, 
-	    CAEN_1742_GR, CAEN_1742_LN);
+    sprintf(
+        br_vars,
+        "system_clock/l:device_clock[%i]/l:trace[%i][%i]/s:trigger[%i][%i]/s",
+        CAEN_1742_CH, CAEN_1742_CH, CAEN_1742_LN, CAEN_1742_GR, CAEN_1742_LN);
 
-    pt_->Branch(br_name.c_str(), 
-		&root_data_.caen_1742_vec[count++], 
-		br_vars);
-
+    pt_->Branch(br_name.c_str(), &root_data_.caen_1742_vec[count++], br_vars);
   }
 
-  //now the dt5720
+  // now the dt5720
   count = 0;
   for (auto &v : conf.get_child("devices.caen_5720")) {
     count++;
@@ -206,24 +184,17 @@ void WriterRoot::StartWriter()
 
   count = 0;
   for (auto &v : conf.get_child("devices.caen_5720")) {
-
     root_data_.caen_5720_vec.resize(count + 1);
 
     br_name = std::string(v.first);
-    sprintf(br_vars, 
-	    "event_index/l:system_clock/l:trace[%i][%i]/s", 
-	    CAEN_5720_CH, 
-	    CAEN_5720_LN);
+    sprintf(br_vars, "event_index/l:system_clock/l:trace[%i][%i]/s",
+            CAEN_5720_CH, CAEN_5720_LN);
 
-    pt_->Branch(br_name.c_str(), 
-		&root_data_.caen_5720_vec[count++], 
-		br_vars);
-
+    pt_->Branch(br_name.c_str(), &root_data_.caen_5720_vec[count++], br_vars);
   }
 }
 
-void WriterRoot::StopWriter()
-{
+void WriterRoot::StopWriter() {
   pf_->Write();
   pf_->Close();
 
@@ -232,13 +203,11 @@ void WriterRoot::StopWriter()
 
   std::string cmd("chown newg2:newg2 ");
   cmd += outfile_.c_str();
-  system((const char*)cmd.c_str());
+  system((const char *)cmd.c_str());
 }
 
-void WriterRoot::PushData(const std::vector<event_data> &data_buffer)
-{
+void WriterRoot::PushData(const std::vector<event_data> &data_buffer) {
   for (auto it = data_buffer.begin(); it != data_buffer.end(); ++it) {
-
     int count = 0;
     for (auto &sis : (*it).sis_3350_vec) {
       root_data_.sis_3350_vec[count++] = sis;
@@ -255,27 +224,27 @@ void WriterRoot::PushData(const std::vector<event_data> &data_buffer)
     }
 
     count = 0;
-    for (auto &caen: (*it).caen_1785_vec) {
+    for (auto &caen : (*it).caen_1785_vec) {
       root_data_.caen_1785_vec[count++] = caen;
     }
 
     count = 0;
-    for (auto &caen: (*it).caen_6742_vec) {
+    for (auto &caen : (*it).caen_6742_vec) {
       root_data_.caen_6742_vec[count++] = caen;
     }
 
     count = 0;
-    for (auto &caen: (*it).caen_1742_vec) {
+    for (auto &caen : (*it).caen_1742_vec) {
       root_data_.caen_1742_vec[count++] = caen;
     }
 
     count = 0;
-    for (auto &drs: (*it).drs4_vec) {
+    for (auto &drs : (*it).drs4_vec) {
       root_data_.drs4_vec[count++] = drs;
     }
 
     count = 0;
-    for (auto &caen: (*it).caen_5720_vec) {
+    for (auto &caen : (*it).caen_5720_vec) {
       root_data_.caen_5720_vec[count++] = caen;
     }
 
@@ -286,12 +255,10 @@ void WriterRoot::PushData(const std::vector<event_data> &data_buffer)
     //      pt_->FlushBaskets();
     //    }
   }
-
 }
 
-void WriterRoot::EndOfBatch(bool bad_data)
-{
-  LogMessage("Received EOB with bad_data flag = %i",  bad_data);
+void WriterRoot::EndOfBatch(bool bad_data) {
+  LogMessage("Received EOB with bad_data flag = %i", bad_data);
 
   if (need_sync_ && bad_data) {
     pt_->DropBaskets();
@@ -300,4 +267,4 @@ void WriterRoot::EndOfBatch(bool bad_data)
   }
 }
 
-} // ::daq
+}  // ::daq

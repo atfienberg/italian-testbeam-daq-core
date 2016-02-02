@@ -10,22 +10,31 @@ WorkerCaenDT5720::WorkerCaenDT5720(std::string name, std::string conf)
 }
 
 WorkerCaenDT5720::~WorkerCaenDT5720() {
+  // make absolutely sure worker thread is done before deallocating
+  thread_live_ = go_time_ = false;
+  if (work_thread_.joinable()) {
+    try {
+      work_thread_.join();
+    } catch (...) {
+      std::cout << name_ << ": thread had race condition joining." << std::endl;
+    }
+  }
+
+  //deallocate dynamic memory
   CAEN_DGTZ_FreeEvent(device_, (void**)&event_);
   CAEN_DGTZ_FreeReadoutBuffer(&buffer_);
 }
 
 void WorkerCaenDT5720::LoadConfig() {
-
   CAEN_DGTZ_SetRecordLength(device_, CAEN_5720_LN);
 
   CAEN_DGTZ_SetChannelEnableMask(device_, 0xf);
 
   // allocate event and buffer
-
   if (CAEN_DGTZ_MallocReadoutBuffer(device_, &buffer_, &size_)) {
     LogMessage("failed to allocate readout buffer.");
   }
-  if (CAEN_DGTZ_AllocateEvent(device_, (void**)&event_)){
+  if (CAEN_DGTZ_AllocateEvent(device_, (void**)&event_)) {
     LogMessage("failed to allocate event");
   }
 }
