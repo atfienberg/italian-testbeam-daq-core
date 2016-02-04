@@ -99,6 +99,9 @@ private:
 
   std::chrono::high_resolution_clock::time_point t0_;
 
+  //wait for SPI busy flag to be clear
+  void WaitForSPI(int group_index);
+
   // Ask device whether it has data.
   bool EventAvailable();
 

@@ -20,9 +20,13 @@ WorkerCaenDT5720::~WorkerCaenDT5720() {
     }
   }
 
-  //deallocate dynamic memory
-  CAEN_DGTZ_FreeEvent(device_, (void**)&event_);
-  CAEN_DGTZ_FreeReadoutBuffer(&buffer_);
+  // free dynamic memory
+  if (CAEN_DGTZ_FreeEvent(device_, (void**)&event_)) {
+    LogError("Failed to free event");
+  }
+  if (CAEN_DGTZ_FreeReadoutBuffer(&buffer_)) {
+    LogError("Failed to free readout buffer");
+  }
 }
 
 void WorkerCaenDT5720::LoadConfig() {
@@ -30,12 +34,24 @@ void WorkerCaenDT5720::LoadConfig() {
 
   CAEN_DGTZ_SetChannelEnableMask(device_, 0xf);
 
+  // set post trigger
+  auto trig_delay = conf_.get<uint32_t>("post_trigger_delay");
+  if ((trig_delay > 100) || (trig_delay < 0)) {
+    LogError(
+        "Invalid post trigger value in config. Must be between 0 and 100. "
+        "Setting to 50");
+    trig_delay = 50;
+  }
+  if (CAEN_DGTZ_SetPostTriggerSize(device_, trig_delay)) {
+    LogError("Error setting post trigger");
+  }
+
   // allocate event and buffer
   if (CAEN_DGTZ_MallocReadoutBuffer(device_, &buffer_, &size_)) {
-    LogMessage("failed to allocate readout buffer.");
+    LogError("failed to allocate readout buffer.");
   }
   if (CAEN_DGTZ_AllocateEvent(device_, (void**)&event_)) {
-    LogMessage("failed to allocate event");
+    LogError("failed to allocate event");
   }
 }
 
