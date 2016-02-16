@@ -151,7 +151,7 @@ void WorkerCaen1742::LoadConfig() {
     LogError("failed to read group settings");
   }
 
-  rc = Write(0x8000, msg | (0x940 | (0x1 << 29)));
+  rc = Write(0x8000, msg | 0x940 );
   if (rc != 0) {
     LogError("failed to enable digitization of triggers");
   }
@@ -176,10 +176,10 @@ void WorkerCaen1742::LoadConfig() {
   }
 
   // enable front panel trigger out
-  rc = Write(0x8110, 0xc000000f);
+  /*  rc = Write(0x8110, 0xc000000f);
   if (rc != 0) {
     LogError("Failed to set front panel trigger out enable mask");
-  }
+    }*/
 
   rc = Read(0x8120, msg);
   if (rc != 0) {
