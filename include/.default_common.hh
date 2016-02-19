@@ -33,6 +33,9 @@ about:  Contains the data structures for several hardware devices in a single
 #define CAEN_1742_CH 32
 #define CAEN_1742_LN 1024
 
+#define CAEN_5720_CH 4
+#define CAEN_5720_LN 1024
+
 #define DRS4_CH 4
 #define DRS4_LN 1024
 
@@ -107,26 +110,16 @@ struct caen_1742 {
   UShort_t trigger[CAEN_1742_GR][CAEN_1742_LN];
 };
 
+struct caen_5720 {
+  ULong64_t event_index;
+  ULong64_t system_clock;
+  UShort_t trace[CAEN_5720_CH][CAEN_5720_LN];
+};
+
 struct drs4 {
   ULong64_t system_clock;
   ULong64_t device_clock[DRS4_CH];
   UShort_t trace[DRS4_CH][DRS4_LN];
-};
-
-struct tek_scope {
-  ULong64_t system_clock;
-  ULong64_t device_clock[TEK_SCOPE_CH];
-  Double_t time[TEK_SCOPE_CH][TEK_SCOPE_LN];
-  Double_t trace[TEK_SCOPE_CH][TEK_SCOPE_LN];
-};
-
-struct run_info {
-  Double_t step_size;
-  Int_t num_steps;
-  Int_t num_shots;
-  Int_t run_number;
-  Int_t fid_ch0;
-  Int_t fid_ch1;
 };
 
 // Built from basic structs
@@ -138,85 +131,7 @@ struct event_data {
   std::vector<caen_1742> caen_1742_vec;
   std::vector<drs4> drs4_vec;
   std::vector<sis_3316> sis_3316_vec;
-};
-
-// NMR specific stuff
-// A macro to define nmr structs since they are very similar.
-#define MAKE_NMR_STRUCT(name, num_ch, len_tr)\
-struct name {\
-  Double_t sys_clock[num_ch];\
-  Double_t gps_clock[num_ch];\
-  Double_t dev_clock[num_ch];\
-  Double_t snr[num_ch];\
-  Double_t len[num_ch];\
-  Double_t freq[num_ch];\
-  Double_t ferr[num_ch];\
-  Double_t freq_zc[num_ch];\
-  Double_t ferr_zc[num_ch];\
-  UShort_t health[num_ch];\
-  UShort_t method[num_ch];\
-  UShort_t trace[num_ch][len_tr];\
-};
-
-// Might as well define a root branch string for the struct.
-#define NMR_HELPER(name, num_ch, len_tr) \
-const char * const name = "sys_clock["#num_ch"]/D:gps_clock["#num_ch"]/D:"\
-"dev_clock["#num_ch"]/D:snr["#num_ch"]/D:len["#num_ch"]/D:freq["#num_ch"]/D:"\
-"ferr["#num_ch"]/D:freq_zc["#num_ch"]/D:ferr_zc["#num_ch"]/D:"\
-"health["#num_ch"]/s:method["#num_ch"]/s:trace["#num_ch"]["#len_tr"]/s"
-
-#define MAKE_NMR_STRING(name, num_ch, len_tr) NMR_HELPER(name, num_ch, len_tr)
-
-
-MAKE_NMR_STRUCT(shim_platform, SHIM_PLATFORM_CH, NMR_FID_LN);
-MAKE_NMR_STRUCT(shim_platform_st, SHIM_PLATFORM_CH, SHORT_FID_LN);
-MAKE_NMR_STRUCT(shim_fixed, SHIM_FIXED_CH, NMR_FID_LN);
-MAKE_NMR_STRUCT(shim_fixed_st, SHIM_FIXED_CH, SHORT_FID_LN);
-
-MAKE_NMR_STRUCT(run_trolley, RUN_TROLLEY_CH, NMR_FID_LN);
-MAKE_NMR_STRUCT(run_trolley_st, RUN_TROLLEY_CH, SHORT_FID_LN);
-MAKE_NMR_STRUCT(run_fixed, RUN_FIXED_CH, NMR_FID_LN);
-MAKE_NMR_STRUCT(run_fixed_st, RUN_FIXED_CH, SHORT_FID_LN);
-
-MAKE_NMR_STRING(shim_platform_string, SHIM_PLATFORM_CH, NMR_FID_LN);
-MAKE_NMR_STRING(shim_platform_st_string, SHIM_PLATFORM_CH, SHORT_FID_LN);
-MAKE_NMR_STRING(shim_fixed_string, SHIM_FIXED_CH, NMR_FID_LN);
-MAKE_NMR_STRING(shim_fixed_st_string, SHIM_FIXED_CH, SHORT_FID_LN);
-
-MAKE_NMR_STRING(run_trolley_string, RUN_TROLLEY_CH, NMR_FID_LN);
-MAKE_NMR_STRING(run_trolley_st_string, RUN_TROLLEY_CH, SHORT_FID_LN);
-MAKE_NMR_STRING(run_fixed_string, RUN_FIXED_CH, NMR_FID_LN);
-MAKE_NMR_STRING(run_fixed_st_string, RUN_FIXED_CH, SHORT_FID_LN);
-
-// flexible struct built from the basic nmr attributes.
-struct nmr_data {
-  std::vector<Double_t> sys_clock;
-  std::vector<Double_t> gps_clock;
-  std::vector<Double_t> dev_clock;
-  std::vector<Double_t> snr;
-  std::vector<Double_t> len;
-  std::vector<Double_t> freq;
-  std::vector<Double_t> ferr;
-  std::vector<Double_t> freq_zc;
-  std::vector<Double_t> ferr_zc;
-  std::vector<UShort_t> health;
-  std::vector<UShort_t> method;
-  std::vector< std::array<UShort_t, NMR_FID_LN> > trace;
-
-  inline void Resize(int size) {
-    sys_clock.resize(size);
-    gps_clock.resize(size);
-    dev_clock.resize(size);
-    snr.resize(size);
-    len.resize(size);
-    freq.resize(size);
-    ferr.resize(size);
-    freq_zc.resize(size);
-    ferr_zc.resize(size);
-    health.resize(size);
-    method.resize(size);
-    trace.resize(size);
-  }
+  std::vector<caen_5720> caen_5720_vec;
 };
 
 // Typedef for all workers - needed by in WorkerList
@@ -226,7 +141,8 @@ typedef boost::variant<WorkerBase<sis_3350> *,
                        WorkerBase<caen_6742> *,
                        WorkerBase<drs4> *,
                        WorkerBase<caen_1742> *,
-                       WorkerBase<sis_3316> *>
+                       WorkerBase<sis_3316> *,
+		       WorkerBase<caen_5720> *>
 worker_ptr_types;
 
 // A useful define guard for I/O with the vme bus.
@@ -250,20 +166,7 @@ inline void light_sleep() {
 }
 
 inline void heavy_sleep() {
-usleep(10000); // in usec
-}
-
-inline long long systime_us() {
- static timeval t;
- gettimeofday(&t, nullptr);
- return (long long)(t.tv_sec)*1000000 + (long long)t.tv_usec;
-}
-
-inline long long steadyclock_us() {
- static timespec t;
-
- clock_gettime(CLOCK_MONOTONIC, &t);
- return (long long)(t.tv_sec)*1000000 + (long long)(t.tv_nsec * 0.001);
+  usleep(10000); // in usec
 }
 
 } // ::daq
