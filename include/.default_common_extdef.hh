@@ -20,13 +20,13 @@ namespace daq {
   std::mutex vme_mutex;
 
   // Set the default config directory.
-  std::string conf_dir("/home/newg2/Workspace/aaron-work/italian-testbeam-daq/fast/config/");
+  std::string conf_dir("/home/venanzoni/testBeam/italian-testbeam-daq/fast/config/");
   // Set up a global zmq context
   zmq::context_t msg_context(1);
 
   // Set the default logging behavior
-  int CommonBase::logging_verbosity_ = 1;
-  std::string CommonBase::logfile_("/home/newg2/Workspace/aaron-work/italian-testbeam-daq/fast/fast-daq.log");
+  int CommonBase::logging_verbosity_ = 3;
+  std::string CommonBase::logfile_("/home/venanzoni/testBeam/italian-testbeam-daq/fast/fast-daq.log");
 
   std::fstream CommonBase::logstream_(logfile_);
   std::mutex CommonBase::log_mutex_;

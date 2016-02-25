@@ -5,8 +5,8 @@ OBJ_VME = $(patsubst include/vme/%.c, build/%.o, $(wildcard include/vme/*.c))
 #OBJ_DRS = $(patsubst src/drs/%.cpp, build/%.o, $(wildcard src/drs/*.cpp))
 #OBJ_DRS += $(patsubst src/drs/%.c, build/%.o, $(wildcard src/drs/*.c))
 DATADEF = include/common.hh include/common_extdef.hh
-LOGFILE = /var/log/lab-daq/fast-daq.log
-CONFDIR = /usr/local/opt/lab-daq/config
+# LOGFILE = /var/log/lab-daq/fast-daq.log
+# CONFDIR = /usr/local/opt/lab-daq/config
 
 # Figure out the architecture
 UNAME_S = $(shell uname -s)
@@ -38,13 +38,12 @@ endif
 
 # ROOT libs and flags
 CPPFLAGS += $(shell root-config --cflags)
-LIBS = $(shell root-config --libs)
+LIBS = -L/usr/lib/i386-linux-gnu -lCore -lCint -lRIO -lNet -lHist -lGraf -lGpad -lTree -lRint -lMatrix -lMathCore -lThread -pthread -lm -ldl -rdynamic -lCAENDigitizer -lzmq
 
 CPPFLAGS += -Iinclude -Ijson11
 LIBS += -lm -lzmq -lCAENDigitizer -lutil -lpthread
 
-all: $(OBJECTS) $(OBJ_VME) $(OBJ_DRS) $(TARGETS) $(DATADEF) \
-	$(LOGFILE) $(CONFDIR)
+all: $(OBJECTS) $(OBJ_VME) $(OBJ_DRS) $(TARGETS)
 
 $(LOGFILE):
 	@mkdir -p $(@D)

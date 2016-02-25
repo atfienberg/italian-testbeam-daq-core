@@ -201,7 +201,7 @@ void WriterRoot::StopWriter() {
   LogMessage("Closed data TFile.");
   delete pf_;
 
-  std::string cmd("chown newg2:newg2 ");
+  std::string cmd("chown venanzoni:venanzoni ");
   cmd += outfile_.c_str();
   system((const char *)cmd.c_str());
 }

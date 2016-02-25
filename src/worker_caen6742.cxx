@@ -35,8 +35,8 @@ void WorkerCaen6742::LoadConfig() {
 
   int device_id = conf.get<int>("device_id");
 
-  if (ret = CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, device_id, 0, 0, &device_)) {
-    this->LogError("failed to open device, error code %i", ret);
+  if (rc = CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, device_id, 0, 0, &device_)) {
+    LogError("failed to open device, error code %i", rc);
   }
 
   // Reset the device.
@@ -135,12 +135,12 @@ void WorkerCaen6742::LoadConfig() {
     LogError("failed to set trigger mode to acquire only");
   }
 
-  rc = CAEN_DGTZ_SetGroupFastTriggerDCOffset(device_, 0x10DC, 0x8000);
+  rc = CAEN_DGTZ_SetGroupFastTriggerDCOffset(device_, 0, 0x8000);
   if (rc != 0) {
     LogError("failed to set fast trigger DC offset");
   }
 
-  rc = CAEN_DGTZ_SetGroupFastTriggerThreshold(device_, 0x10D4, 0x51C6);
+  rc = CAEN_DGTZ_SetGroupFastTriggerThreshold(device_, 0, 0x51C6);
   if (rc != 0) {
     LogError("failed to adjust fast trigger threshold");
   }
@@ -149,22 +149,6 @@ void WorkerCaen6742::LoadConfig() {
   rc = CAEN_DGTZ_SetFastTriggerDigitizing(device_, CAEN_DGTZ_ENABLE);
   if (rc != 0) {
     LogError("failed to enable digitization of the fast trigger");
-  }
-
-  // Disable self trigger.
-  rc = CAEN_DGTZ_SetChannelSelfTrigger(device_, CAEN_DGTZ_TRGMODE_DISABLED,
-                                       0xffff);
-  if (rc != 0) {
-    LogError("failed to disable self-triggering");
-  }
-
-  // Channel pulse polarity
-  for (int ch = 0; ch < CAEN_6742_CH; ++ch) {
-    rc = CAEN_DGTZ_SetChannelPulsePolarity(device_, ch,
-                                           CAEN_DGTZ_PulsePolarityPositive);
-    if (rc != 0) {
-      LogError("failed to set pulse polarity for channel %i", ch);
-    }
   }
 
   // Set the acquisition mode.
