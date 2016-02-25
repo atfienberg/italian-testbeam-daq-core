@@ -36,6 +36,9 @@ about:  Contains the data structures for several hardware devices in a single
 #define CAEN_5720_CH 4
 #define CAEN_5720_LN 1024
 
+#define CAEN_5730_CH 8
+#define CAEN_5730_LN 500
+
 #define DRS4_CH 4
 #define DRS4_LN 1024
 
@@ -116,6 +119,12 @@ struct caen_5720 {
   UShort_t trace[CAEN_5720_CH][CAEN_5720_LN];
 };
 
+struct caen_5730 {
+  ULong64_t event_index;
+  ULong64_t system_clock;
+  UShort_t trace[CAEN_5730_CH][CAEN_5730_LN];
+};
+
 struct drs4 {
   ULong64_t system_clock;
   ULong64_t device_clock[DRS4_CH];
@@ -132,6 +141,7 @@ struct event_data {
   std::vector<drs4> drs4_vec;
   std::vector<sis_3316> sis_3316_vec;
   std::vector<caen_5720> caen_5720_vec;
+  std::vector<caen_5730> caen_5730_vec;
 };
 
 // Typedef for all workers - needed by in WorkerList
@@ -142,7 +152,8 @@ typedef boost::variant<WorkerBase<sis_3350> *,
                        WorkerBase<drs4> *,
                        WorkerBase<caen_1742> *,
                        WorkerBase<sis_3316> *,
-		       WorkerBase<caen_5720> *>
+		       WorkerBase<caen_5720> *,
+		       WorkerBase<caen_5730> *>
 worker_ptr_types;
 
 // A useful define guard for I/O with the vme bus.

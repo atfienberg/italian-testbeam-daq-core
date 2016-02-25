@@ -130,7 +130,7 @@ void WriterOnline::PackMessage() {
     }
     sis_map["trace"] = trace_vec;
 
-    sprintf(str, "sis_3350_vec_%i", count++);
+    sprintf(str, "sis_3350_%i", count++);
     json_map[str] = sis_map;
   }
 
@@ -150,7 +150,7 @@ void WriterOnline::PackMessage() {
     }
     sis_map["trace"] = trace_vec;
 
-    sprintf(str, "sis_3302_vec_%i", count++);
+    sprintf(str, "sis_3302_%i", count++);
     json_map[str] = sis_map;
   }
 
@@ -170,7 +170,7 @@ void WriterOnline::PackMessage() {
     }
     sis_map["trace"] = trace_vec;
 
-    sprintf(str, "sis_3316_vec_%i", count++);
+    sprintf(str, "sis_3316_%i", count++);
     json_map[str] = sis_map;
   }
 
@@ -190,7 +190,7 @@ void WriterOnline::PackMessage() {
     }
     caen_map["trace"] = trace_vec;
 
-    sprintf(str, "caen_6742_vec_%i", count++);
+    sprintf(str, "caen_6742_%i", count++);
     json_map[str] = caen_map;
   }
 
@@ -216,7 +216,7 @@ void WriterOnline::PackMessage() {
     }
     caen_map["trigger"] = trig_vec;
 
-    sprintf(str, "caen_1742_vec_%i", count++);
+    sprintf(str, "caen_1742_%i", count++);
     json_map[str] = caen_map;
   }
 
@@ -236,7 +236,7 @@ void WriterOnline::PackMessage() {
     }
     drs_map["trace"] = trace_vec;
 
-    sprintf(str, "drs4_vec_%i", count++);
+    sprintf(str, "drs4_%i", count++);
     json_map[str] = drs_map;
   }
 
@@ -255,9 +255,29 @@ void WriterOnline::PackMessage() {
     }
     caen_map["trace"] = trace_vec;
 
-    sprintf(str, "caen5720_vec_%i", count++);
+    sprintf(str, "caen5720_%i", count++);
     json_map[str] = caen_map;
   }
+
+  count = 0;
+  for (auto &caen : data.caen_5730_vec) {
+    json11::Json::object caen_map;
+    auto trace_len = max_trace_length_ < 0 ? CAEN_5730_LN : max_trace_length_;
+    
+    caen_map["system_clock"] = static_cast<double>(caen.system_clock);
+    
+    caen_map["event_index"] = static_cast<double>(caen.event_index);
+    
+    std::vector<std::vector<double> > trace_vec;
+    for (int ch = 0; ch < CAEN_5730_CH; ++ch) {
+      trace_vec.emplace_back(caen.trace[ch], caen.trace[ch] + trace_len);
+    }
+    caen_map["trace"] = trace_vec;
+    
+    sprintf(str, "caen5730_%i", count++);
+    json_map[str] = caen_map;
+  }
+
 
   std::string buffer = json11::Json(json_map).dump();
   buffer.append("__EOM__");

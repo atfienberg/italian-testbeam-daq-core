@@ -25,7 +25,7 @@ namespace daq {
   zmq::context_t msg_context(1);
 
   // Set the default logging behavior
-  int CommonBase::logging_verbosity_ = 3;
+  int CommonBase::logging_verbosity_ = 1;
   std::string CommonBase::logfile_("/home/venanzoni/testBeam/italian-testbeam-daq/fast/fast-daq.log");
 
   std::fstream CommonBase::logstream_(logfile_);

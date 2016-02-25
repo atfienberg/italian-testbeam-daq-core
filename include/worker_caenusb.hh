@@ -105,40 +105,6 @@ void WorkerCaenUSBBase<T>::LoadConfig() {
     this->LogError("failed to enable ext trigger");
   }
 
-  // set channel dc offsets
-  int channel_num = 0;
-  for (const auto& entry : conf_.get_child("channel_offset")) {
-    if (channel_num >= board_info_.Channels) {
-      this->LogError(
-          "Too many channels in config dc offsets. This is a %i channel device",
-          board_info_.Channels);
-      break;
-    }
-
-    double val = entry.second.get<double>("");
-
-    if ((val > 1) || (val < 0)) {
-      val = 0.5;
-      this->LogError(
-          "Invalid channel offset from config. Must be between 0 and 1."
-          " Setting to 0.5");
-    }
-
-    uint32_t Tvalue = val * 0xffff;
-    if (Tvalue > 0xffff) {
-      Tvalue = 0xffff;
-    } else if (Tvalue < 0) {
-      Tvalue = 0;
-    }
-
-    if (CAEN_DGTZ_SetChannelDCOffset(device_, channel_num, Tvalue)) {
-      this->LogError("Error setting DC offset to %i for channel %i", Tvalue,
-                     channel_num);
-    }
-
-    ++channel_num;
-  }
-
   if (CAEN_DGTZ_SetMaxNumEventsBLT(device_, 1)) {
     this->LogError("failed to set max BLT events");
   }

@@ -29,6 +29,7 @@
 #include "worker_caen6742.hh"
 #include "worker_caen1742.hh"
 #include "worker_caenDT5720.hh"
+#include "worker_caenDT5730.hh"
 // #include "worker_drs4.hh"
 
 namespace daq {

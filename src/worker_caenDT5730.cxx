@@ -1,15 +1,15 @@
-#include "worker_caenDT5720.hh"
+#include "worker_caenDT5730.hh"
 
 namespace daq {
 
-  WorkerCaenDT5720::WorkerCaenDT5720(std::string name, std::string conf)
-    : WorkerCaenUSBBase<caen_5720>(name, conf),
+  WorkerCaenDT5730::WorkerCaenDT5730(std::string name, std::string conf)
+    : WorkerCaenUSBBase<caen_5730>(name, conf),
       event_(nullptr),
       event_ptr_(nullptr) {
     LoadConfig();
   }
 
-  WorkerCaenDT5720::~WorkerCaenDT5720() {
+  WorkerCaenDT5730::~WorkerCaenDT5730() {
     // make absolutely sure worker thread is done before deallocating
     thread_live_ = go_time_ = false;
     if (work_thread_.joinable()) {
@@ -29,16 +29,15 @@ namespace daq {
     }
   }
 
-  void WorkerCaenDT5720::LoadConfig() {
-    CAEN_DGTZ_SetRecordLength(device_, CAEN_5720_LN);
+  void WorkerCaenDT5730::LoadConfig() {
+    CAEN_DGTZ_SetRecordLength(device_, CAEN_5730_LN);
 
-    CAEN_DGTZ_SetChannelEnableMask(device_, 0xf);
+    CAEN_DGTZ_SetChannelEnableMask(device_, 0xff);
 
-    //disable self trigger
-    if (CAEN_DGTZ_SetChannelSelfTrigger(device_, CAEN_DGTZ_TRGMODE_DISABLED, 0xf)){
+    // disable self trigger
+    if (CAEN_DGTZ_SetChannelSelfTrigger(device_, CAEN_DGTZ_TRGMODE_DISABLED, 0xff)){
       LogError("failed to disable self triggering");
     }      
-
 
     // set post trigger
     auto trig_delay = conf_.get<uint32_t>("post_trigger_delay");
@@ -52,8 +51,31 @@ namespace daq {
       LogError("Error setting post trigger");
     }
 
-    // set channel dc offsets
+    // set channel gains
     int channel_num = 0;
+    for (const auto& entry : conf_.get_child("channel_gain")) {
+      if (channel_num >= board_info_.Channels) {
+	LogError(
+		 "Too many channels in config gains offsets. This is a %i channel device",
+		 board_info_.Channels);
+	break;
+      }
+
+      std::string val = entry.second.get<std::string>("");
+      uint32_t gainbit = 0;
+      if (val == "high"){
+	gainbit = 1;
+      } else if (val != "low"){
+	LogError("Invalid gain value %s", val.c_str());
+      }
+
+      if ( CAEN_DGTZ_WriteRegister(device_, 0x1028 + (0x100)*channel_num++, gainbit) ){
+	LogError("error setting gain bit");
+      }
+    }
+
+    // set channel dc offsets
+    channel_num = 0;
     for (const auto& entry : conf_.get_child("channel_offset")) {
       if (channel_num >= board_info_.Channels) {
 	LogError(
@@ -86,7 +108,6 @@ namespace daq {
       ++channel_num;
     }
 
-
     // allocate event and buffer
     if (CAEN_DGTZ_MallocReadoutBuffer(device_, &buffer_, &size_)) {
       LogError("failed to allocate readout buffer.");
@@ -96,10 +117,10 @@ namespace daq {
     }
   }
 
-  caen_5720 WorkerCaenDT5720::GetEvent() {
+  caen_5730 WorkerCaenDT5730::GetEvent() {
     LogMessage("getting event!");
 
-    caen_5720 bundle;
+    caen_5730 bundle;
 
     if (CAEN_DGTZ_GetEventInfo(device_, buffer_, bsize_, 0, &event_info_,
 			       &event_ptr_)) {
@@ -119,8 +140,8 @@ namespace daq {
     bundle.system_clock =
       std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0_).count();
 
-    for (uint32_t i = 0; i < CAEN_5720_CH; ++i) {
-      std::copy(event_->DataChannel[i], event_->DataChannel[i] + CAEN_5720_LN,
+    for (uint32_t i = 0; i < CAEN_5730_CH; ++i) {
+      std::copy(event_->DataChannel[i], event_->DataChannel[i] + CAEN_5730_LN,
 		bundle.trace[i]);
     }
 
