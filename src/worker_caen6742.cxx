@@ -212,13 +212,12 @@ void WorkerCaen6742::WorkLoop() {
     while (go_time_) {
       if (EventAvailable()) {
         static caen_6742 bundle;
-        GetEvent(bundle);
-
-        queue_mutex_.lock();
-        data_queue_.push(bundle);
-        has_event_ = true;
-        queue_mutex_.unlock();
-
+        if (GetEvent(bundle)){	  
+	  queue_mutex_.lock();
+	  data_queue_.push(bundle);
+	  has_event_ = true;
+	  queue_mutex_.unlock();
+	}
       } else {
         std::this_thread::yield();
         usleep(daq::short_sleep);
@@ -287,7 +286,7 @@ bool WorkerCaen6742::EventAvailable() {
   }
 }
 
-void WorkerCaen6742::GetEvent(caen_6742 &bundle) {
+bool WorkerCaen6742::GetEvent(caen_6742 &bundle) {
   using namespace std::chrono;
   int ch, rc = 0;
   char *evtptr = nullptr;
@@ -305,8 +304,12 @@ void WorkerCaen6742::GetEvent(caen_6742 &bundle) {
   }
 
   rc = CAEN_DGTZ_DecodeEvent(device_, evtptr, (void **)&event_);
-  if (rc != 0) {
-    LogError("failed to decode event");
+  if (rc == -21){
+    LogMessage("invalid event");
+    return false;
+  }
+  else if (rc != 0) {
+    LogError("failed to decode event %i, code %i", event_info_.EventCounter, rc);
   }
 
   int gr, ch_idx;
@@ -326,6 +329,8 @@ void WorkerCaen6742::GetEvent(caen_6742 &bundle) {
                 bundle.trace[ch_idx]);
     }
   }
+  
+  return true;
 }
 
 }  // ::daq

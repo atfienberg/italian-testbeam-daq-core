@@ -81,7 +81,7 @@ private:
   bool EventAvailable();
 
   // Read out the data and add it to the queue.
-  void GetEvent(caen_6742 &bundle);
+  bool GetEvent(caen_6742 &bundle);
 
 };
 
