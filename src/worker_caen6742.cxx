@@ -125,7 +125,7 @@ void WorkerCaen6742::LoadConfig() {
 
     if ((val > 1) || (val < 0)) {
       val = 0.5;
-      this->LogError(
+      LogError(
           "Invalid channel offset from config. Must be between 0 and 1."
           " Setting to 0.5");
     }
@@ -146,13 +146,16 @@ void WorkerCaen6742::LoadConfig() {
   }
 
   // Enable external trigger.
-  //  rc = CAEN_DGTZ_SetExtTriggerInputMode(device_,
-  //  CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+  rc = CAEN_DGTZ_SetExtTriggerInputMode(device_,
+					CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT);
+  if (rc != 0){
+    LogError("failed to set ext trigger mode");
+  }
   // Enable fast trigger - NIM
-  rc = CAEN_DGTZ_SetFastTriggerMode(device_, CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+  /*  rc = CAEN_DGTZ_SetFastTriggerMode(device_, CAEN_DGTZ_TRGMODE_ACQ_ONLY);
   if (rc != 0) {
     LogError("failed to set trigger mode to acquire only");
-  }
+    }*/
 
   rc = CAEN_DGTZ_SetGroupFastTriggerDCOffset(device_, 0, 0x8000);
   if (rc != 0) {
@@ -318,7 +321,6 @@ void WorkerCaen6742::GetEvent(caen_6742 &bundle) {
 
       int len = event_->DataGroup[gr].ChSize[ch];
       bundle.device_clock[ch_idx] = event_->DataGroup[gr].TriggerTimeTag;
-      std::cout << "Copying event." << std::endl;
       std::copy(event_->DataGroup[gr].DataChannel[ch],
                 event_->DataGroup[gr].DataChannel[ch] + len,
                 bundle.trace[ch_idx]);

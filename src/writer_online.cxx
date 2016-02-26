@@ -263,7 +263,7 @@ void WriterOnline::PackMessage() {
   for (auto &caen : data.caen_5730_vec) {
     json11::Json::object caen_map;
     auto trace_len = max_trace_length_ < 0 ? CAEN_5730_LN : max_trace_length_;
-    
+
     caen_map["system_clock"] = static_cast<double>(caen.system_clock);
     
     caen_map["event_index"] = static_cast<double>(caen.event_index);
