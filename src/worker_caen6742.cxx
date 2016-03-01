@@ -94,6 +94,7 @@ void WorkerCaen6742::LoadConfig() {
 
   // Load and enable DRS4 corrections.
   if (conf.get<bool>("use_drs4_corrections")) {
+    LogMessage("using drs4 corrections");
     rc = CAEN_DGTZ_LoadDRS4CorrectionData(device_, rate);
     if (rc != 0) {
       LogError("failed to load DRS4 correction data");

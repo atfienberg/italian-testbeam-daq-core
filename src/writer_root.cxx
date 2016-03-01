@@ -219,7 +219,7 @@ void WriterRoot::StopWriter() {
   LogMessage("Closed data TFile.");
   delete pf_;
 
-  std::string cmd("chown venanzoni:venanzoni ");
+  std::string cmd("chown testbeam:testbeam ");
   cmd += outfile_.c_str();
   system((const char *)cmd.c_str());
 }
