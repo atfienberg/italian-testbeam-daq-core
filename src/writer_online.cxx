@@ -50,7 +50,12 @@ void WriterOnline::EndOfBatch(bool bad_data) {
 
   int count = 0;
   while (count < 50) {
-    online_sck_.send(msg, ZMQ_DONTWAIT);
+    try {
+      online_sck_.send(msg, ZMQ_DONTWAIT);
+    } catch (const zmq::error_t &e) {
+      // interruped system call
+      continue;
+    }
     usleep(100);
 
     count++;
@@ -68,7 +73,12 @@ void WriterOnline::SendMessageLoop() {
         int count = 0;
         bool rc = false;
         while (rc == false && count < 200) {
-          rc = online_sck_.send(message_, ZMQ_DONTWAIT);
+	  try {
+	    rc = online_sck_.send(message_, ZMQ_DONTWAIT);
+	  } catch (const zmq::error_t &e) {
+	    // interruped system call
+	    continue;
+	  }
           count++;
         }
 

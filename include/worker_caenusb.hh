@@ -84,8 +84,12 @@ void WorkerCaenUSBBase<T>::LoadConfig() {
     this->LogError("failed to open device, error code %i", ret);
   }
 
-  if (CAEN_DGTZ_Reset(device_)) {
-    this->LogError("failed to reset device");
+  // if (CAEN_DGTZ_Reset(device_)) {
+  //   this->LogError("failed to reset device");
+  // }
+
+  if (CAEN_DGTZ_ClearData(device_)){
+    this->LogError("failed to clear data");
   }
 
   if (CAEN_DGTZ_GetInfo(device_, &board_info_)) {
