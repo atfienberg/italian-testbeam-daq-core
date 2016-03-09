@@ -40,6 +40,17 @@ void WorkerCaenDT5730::LoadConfig() {
     LogError("failed to disable self triggering");
   }
 
+  //set iomode to ttl or nim
+  uint32_t regval;
+  if (CAEN_DGTZ_ReadRegister(device_, 0x811c, &regval)){
+    LogError("failed to read io front panel register");
+  }
+  //  regval |= 1; //ttl
+  regval &= ~1 //nim
+  if (CAEN_DGTZ_WriteRegister(device_, 0x811c, regval)){
+    LogError("failed to write front panel register enabling ttl");
+  }
+
   // set post trigger
   auto trig_delay = conf_.get<uint32_t>("post_trigger_delay");
   if ((trig_delay > 100) || (trig_delay < 0)) {
