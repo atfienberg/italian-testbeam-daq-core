@@ -104,8 +104,12 @@ void EventBuilder::ControlLoop() {
 }
 
 bool EventBuilder::WorkersGotSyncEvent() {
+  bool any_have_event =  workers_.AnyWorkersHaveEvent();
+  //if only one worker, no need to try synchronization
+  if (workers_.Size() == 1) { return any_have_event; }
+
   // Check if anybody has an event.
-  if (!workers_.AnyWorkersHaveEvent()) return false;
+  if (!any_have_event) return false;
   LogMessage("Detected a trigger");
 
   // Wait for all devices to get a chance to read the event.
