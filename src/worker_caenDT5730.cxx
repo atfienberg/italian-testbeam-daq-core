@@ -45,10 +45,13 @@ void WorkerCaenDT5730::LoadConfig() {
   if (CAEN_DGTZ_ReadRegister(device_, 0x811c, &regval)){
     LogError("failed to read io front panel register");
   }
-  //  regval |= 1; //ttl
-  regval &= ~1 //nim
+  if (conf_.get<std::string>("trigger_type") == "ttl"){
+    regval |= 1; //ttl
+  } else {
+    regval &= ~1; //nim
+  }
   if (CAEN_DGTZ_WriteRegister(device_, 0x811c, regval)){
-    LogError("failed to write front panel register enabling ttl");
+    LogError("failed to write front panel register enabling ttl/nim");
   }
 
   // set post trigger
