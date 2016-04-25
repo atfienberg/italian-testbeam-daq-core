@@ -38,7 +38,7 @@ endif
 
 # ROOT libs and flags
 CPPFLAGS += $(shell root-config --cflags)
-LIBS = -L/usr/lib/i386-linux-gnu -lCore -lCint -lRIO -lNet -lHist -lGraf -lGpad -lTree -lRint -lMatrix -lMathCore -lThread -pthread -lm -ldl -rdynamic -lCAENDigitizer -lzmq
+LIBS = $(shell root-config --libs) -lCAENDigitizer -lzmq
 
 CPPFLAGS += -Iinclude -Ijson11
 LIBS += -lm -lzmq -lCAENDigitizer -lutil -lpthread
